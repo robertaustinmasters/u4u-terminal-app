@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>U4U Acoustic Vault</title>
     <link rel="manifest" href="manifest.json">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #050a08;
@@ -110,12 +109,16 @@
             font-size: 0.85em;
             padding: 10px;
         }
+        #outputBox {
+            display: none;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>U4U MESH // V33.19</h2>
+        <h2>U4U MESH // V33.20 (REST API)</h2>
         <div style="font-size: 0.8em; color: var(--text-muted);">ROOT & RELAY PROTOCOL ACTIVE</div>
     </div>
 
@@ -136,30 +139,27 @@
         </div>
     </div>
 
-    <div class="button-container">
-        <button class="mesh-btn" onclick="triggerCommand('/swarm')">🐝 INITIATE N+M SWARM</button>
-        <button class="mesh-btn" onclick="triggerCommand('/apex')">🔐 ACCESS APEX GATE</button>
-        <button class="mesh-btn alert" onclick="triggerCommand('/xenon_spin')">🛑 XENON ANESTHETIC OVERRIDE</button>
+    <!-- Synthesis Output Display -->
+    <div class="lore-box" id="outputBox">
+        <div class="lore-title">Swarm Synthesis Output</div>
+        <div id="responseText">Awaiting data...</div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        const RENDER_API_URL = "https://masters-megawin-bridge.onrender.com/api/synthesize";
 
-        function triggerCommand(cmd) {
-            tg.HapticFeedback.impactOccurred('heavy');
-            tg.sendData(cmd); 
-        }
-
-        function submitLead(commandType) {
+        async function submitLead(commandType) {
             const input = document.getElementById('leadInput').value;
             if (!input) {
-                tg.showAlert("Input required. The Swarm cannot synthesize an empty payload.");
+                alert("Input required. The Swarm cannot synthesize an empty payload.");
                 return;
             }
-            tg.HapticFeedback.impactOccurred('heavy');
-            tg.sendData(commandType + " " + input);
-        }
-    </script>
-</body>
-</html>
+            
+            const outputBox = document.getElementById('outputBox');
+            const responseText = document.getElementById('responseText');
+            
+            outputBox.style.display = "block";
+            responseText.innerText = "Synthesizing N+M Protocol... Please wait.";
+
+            try {
+                const
