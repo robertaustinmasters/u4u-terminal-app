@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U4U Acoustic Vault</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ffcc;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #canvas-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-top: 20px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+        .slider-group {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input[type="range"] {
+            width: 70%;
+        }
+        button {
+            background: transparent;
+            color: #ff5555;
+            border: 1px solid #ff5555;
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 50px;
+            box-shadow: 0 0 10px rgba(255, 85, 85, 0.5);
+            transition: all 0.3s;
+        }
+        button:active {
+            background: #ff5555;
+            color: #000;
+        }
+        #status {
+            margin-top: 20px;
+            text-align: center;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>[ U4U TERMINAL ]</h2>
+    <div id="status">Awaiting Plasma Doorway...</div>
+    
+    <button id="igniteBtn">IGNITE PLASMA DOORWAY</button>
+
+    <div id="canvas-container">
+        <canvas id="causticCanvas" width="300" height="300"></canvas>
+    </div>
+
+    <div class="controls" id="controls">
+        <div class="slider-group">
+            <label>Fire (X): <span id="xVal">1</span></label>
+            <input type="range" id="freqX" min="1" max="10" value="1">
+        </div>
+        <div class="slider-group">
+            <label>Water (Y): <span id="yVal">1</span></label>
+            <input type="range" id="freqY" min="1" max="10" value="1">
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Expand app to full height
+
+        const canvas = document.getElementById('causticCanvas');
+        const ctx = canvas.getContext('2d');
+        const igniteBtn = document.getElementById('igniteBtn');
+        const controls = document.getElementById('controls');
+        const statusText = document.getElementById('status');
+        const sliderX = document.getElementById('freqX');
+        const sliderY = document.getElementById('freqY');
+        
+        let isIgnited = false;
+        let time = 0;
+        let phaseLockTriggered = false;
+
+        igniteBtn.addEventListener('click', () => {
+            isIgnited = true;
+            igniteBtn.style.display = 'none';
+            controls.style.display = 'flex';
+            statusText.style.color = '#00ffcc';
+            statusText.innerText = "Etheric Field Active. Align Frequencies.";
+            drawLissajous();
+        });
+
+        sliderX.addEventListener('input', (e) => document.getElementById('xVal').innerText = e.target.value);
+        sliderY.addEventListener('input', (e) => document.getElementById('yVal').innerText = e.target.value);
+
+        function drawLissajous() {
+            if (!isIgnited || phaseLockTriggered) return;
+
+            const a = parseInt(sliderX.value);
+            const b = parseInt(sliderY.value);
+            
+            // Check for Vector Equilibrium (3:2 ratio)
+            if (a === 3 && b === 2) {
+                triggerPhaseLock();
+                return;
+            }
+
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            for (let t = 0; t < Math.PI * 2; t += 0.05) {
+                const x = 150 + 130 * Math.sin(a * t + time);
+                const y = 150 + 130 * Math.sin(b * t);
+                ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = `hsl(${(time * 50) % 360}, 100%, 50%)`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            time += 0.05;
+            requestAnimationFrame(drawLissajous);
+        }
+
+        function triggerPhaseLock() {
+            phaseLockTriggered = true;
+            statusText.innerText = "VECTOR EQUILIBRIUM ACHIEVED";
+            statusText.style.color = "#ffeb3b";
+            
+            // Draw stable closed loop geometry perfectly
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            for (let t = 0; t <= Math.PI * 2; t += 0.01) {
+                const x = 150 + 130 * Math.sin(3 * t + Math.PI / 2);
+                const y = 150 + 130 * Math.sin(2 * t);
+                ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = "#ffeb3b";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Send payload to FastAPI backend and close Telegram Web App
+            setTimeout(() => {
+                tg.sendData("RESONANCE_3_2");
+                tg.close();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
