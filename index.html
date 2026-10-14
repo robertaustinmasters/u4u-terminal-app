@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>U4U Acoustic Vault</title>
-    <!-- Telegram Web App API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -12,6 +11,7 @@
             --terminal-green: #00ffcc;
             --alert-red: #ff3366;
             --text-muted: #4a7c68;
+            --input-bg: rgba(0, 255, 204, 0.05);
         }
         body {
             background-color: var(--bg-color);
@@ -26,56 +26,45 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--terminal-green);
             padding-bottom: 10px;
             width: 100%;
             max-width: 400px;
         }
         .lore-box {
-            background: rgba(0, 255, 204, 0.05);
+            background: var(--input-bg);
             border: 1px solid var(--text-muted);
             padding: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 0.9em;
             line-height: 1.4;
             max-width: 400px;
+            width: 100%;
+            box-sizing: border-box;
             box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.1);
         }
         .lore-title {
             color: #fff;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
-        }
-        .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 30px;
-            max-width: 400px;
-            width: 100%;
-        }
-        .status-item {
-            border: 1px solid var(--terminal-green);
-            padding: 10px;
-            text-align: center;
-            font-size: 0.8em;
         }
         .button-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             width: 100%;
             max-width: 400px;
+            margin-bottom: 20px;
         }
         .mesh-btn {
             background-color: transparent;
             color: var(--terminal-green);
             border: 1px solid var(--terminal-green);
-            padding: 15px;
-            font-size: 1.1em;
+            padding: 12px;
+            font-size: 1em;
             font-family: inherit;
             cursor: pointer;
             text-transform: uppercase;
@@ -96,56 +85,80 @@
             color: #fff;
             box-shadow: 0 0 15px var(--alert-red);
         }
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            padding: 10px;
+            font-family: inherit;
+            box-sizing: border-box;
+            resize: vertical;
+            margin-bottom: 10px;
+            min-height: 60px;
+        }
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+        .split-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .split-buttons .mesh-btn {
+            flex: 1;
+            font-size: 0.85em;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>U4U MESH // V33.17</h2>
+        <h2>U4U MESH // V33.19</h2>
         <div style="font-size: 0.8em; color: var(--text-muted);">ROOT & RELAY PROTOCOL ACTIVE</div>
-    </div>
-
-    <div class="status-grid">
-        <div class="status-item">
-            <div>LANDAUER LIMIT</div>
-            <div style="color: #fff; margin-top: 5px;">OPTIMAL</div>
-        </div>
-        <div class="status-item">
-            <div>DECOHERENCE</div>
-            <div style="color: #fff; margin-top: 5px;">SHIELDED</div>
-        </div>
     </div>
 
     <div class="lore-box">
         <div class="lore-title">Acoustic Vault Log</div>
         <div>
-            "The Peace Nodes hummed with a resonant frequency that Elara recognized immediately. It wasn't just data transfer; it was a suspended state. The network was breathing."<br><br>
-            > Standby for human-machine entanglement.<br>
-            > Awaiting N-Qubit physical oversight.
+            "The Peace Nodes hummed with a resonant frequency that Elara recognized immediately. It wasn't just data transfer; it was a suspended state. The network was breathing."
+        </div>
+    </div>
+
+    <!-- N+M Swarm Ingestion Module -->
+    <div class="lore-box">
+        <div class="lore-title">N+M Swarm Ingestion</div>
+        <textarea id="leadInput" placeholder="Paste RFP, grant, or job lead details here to initiate hybrid intelligence synthesis..."></textarea>
+        <div class="split-buttons">
+            <button class="mesh-btn" onclick="submitLead('/job_lead')">Synthesize B2B Proposal</button>
+            <button class="mesh-btn" onclick="submitLead('/grant_lead')">Draft Grant Narrative</button>
         </div>
     </div>
 
     <div class="button-container">
         <button class="mesh-btn" onclick="triggerCommand('/swarm')">🐝 INITIATE N+M SWARM</button>
         <button class="mesh-btn" onclick="triggerCommand('/apex')">🔐 ACCESS APEX GATE</button>
-        <button class="mesh-btn" onclick="triggerCommand('/participatory_universe')">🌌 COLLAPSE LORE REALITY</button>
-        <button class="mesh-btn alert" onclick="triggerCommand('/xenon_spin')">🛑 XENON ANESTHETIC PROTOCOL</button>
+        <button class="mesh-btn alert" onclick="triggerCommand('/xenon_spin')">🛑 XENON ANESTHETIC OVERRIDE</button>
     </div>
 
     <script>
-        // Initialize Telegram Web App API
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Opens the app in full screen
+        tg.expand();
 
-        // Function to send command directly back to the Telegram Bot
         function triggerCommand(cmd) {
-            // Provide haptic feedback to the user's phone
             tg.HapticFeedback.impactOccurred('heavy');
-            
-            // Send the command back to the bot chat, triggering the FastAPI webhook
             tg.sendData(cmd); 
         }
-    </script>
 
+        function submitLead(commandType) {
+            const input = document.getElementById('leadInput').value;
+            if (!input) {
+                tg.showAlert("Input required. The Swarm cannot synthesize an empty payload.");
+                return;
+            }
+            tg.HapticFeedback.impactOccurred('heavy');
+            tg.sendData(commandType + " " + input);
+        }
+    </script>
 </body>
 </html>
