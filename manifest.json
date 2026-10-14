@@ -1,0 +1,16 @@
+{
+  "name": "U4U Acoustic Vault",
+  "short_name": "U4U MESH",
+  "description": "N+M Qubit Terminal and Swarm Ingestion Interface for the U-FOR-US Regenerative Mesh.",
+  "start_url": "/u4u-terminal-app/",
+  "display": "standalone",
+  "background_color": "#050a08",
+  "theme_color": "#00ffcc",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
