@@ -162,4 +162,29 @@
             responseText.innerText = "Synthesizing N+M Protocol... Please wait.";
 
             try {
-                const
+                const response = await fetch(RENDER_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        command: commandType,
+                        text: input
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    responseText.innerText = data.response;
+                } else {
+                    responseText.innerText = "Error: " + (data.response || "Unknown error occurred.");
+                }
+                
+            } catch (error) {
+                responseText.innerText = "Connection Error: Ensure the Render backend is live and CORS is configured. " + error;
+            }
+        }
+    </script>
+</body>
+</html>
