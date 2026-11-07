@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 app = FastAPI(title="U4U Master Bridge")
 
-MESH_AUTH_TOKEN = None
+import os
+MESH_AUTH_TOKEN = os.environ.get('MESH_AUTH_TOKEN')
 
 class SynthesizeRequest(BaseModel):
     command: str
@@ -27,3 +28,4 @@ async def synthesize_route(request: SynthesizeRequest, x_u4u_auth: str | None = 
 
 # Serve static frontend files from the same directory
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
+
