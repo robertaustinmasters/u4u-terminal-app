@@ -1,80 +1,60 @@
-// U4U Terminal - Frontend Logic
+const terminalInput = document.getElementById("terminal-input");
+// Assuming you have a div for output; fallback to body if not found
+const terminalOutput = document.getElementById("terminal-output") || document.body;
 
-// --- 1. Master Bridge Pipeline ---
-async function routeToMasterBridge(commandName, userText) {
-    try {
-        const response = await fetch("/api/synthesize", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                command: commandName,
-                text: userText
-            })
-        });
+// Use a relative path since frontend and backend are on the same Render domain
+const API_URL = "/api/synthesize"; 
+const AUTH_TOKEN = "YOUR_SECURE_TOKEN_HERE";
 
-        const data = await response.json();
+terminalInput.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+        const cmd = terminalInput.value.trim();
+        if (!cmd) return;
 
-        if (data.status === "success") {
-            return data.response;
-        } else {
-            return "Error: Master Bridge rejected the payload.";
-        }
-    } catch (error) {
-        return "Critical Error: Could not reach the U4U Master Bridge. Check uplink.";
-    }
-}
+        // Echo user command to the screen
+        const cmdLine = document.createElement("div");
+        cmdLine.textContent = `> ${cmd}`;
+        terminalOutput.appendChild(cmdLine);
+        terminalInput.value = "";
 
-// --- 2. Terminal UI Logic ---
-document.addEventListener("DOMContentLoaded", () => {
-    const outputDiv = document.getElementById("terminal-output");
-    const inputField = document.getElementById("terminal-input");
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-u4u-auth": AUTH_TOKEN
+                },
+                // Send BOTH keys to satisfy the FastAPI SynthesizeRequest schema
+                body: JSON.stringify({ command: "web_terminal", text: cmd }) 
+            });
 
-    if (!inputField || !outputDiv) {
-        console.warn("System Notice: Please ensure your HTML contains <div id='terminal-output'></div> and <input id='terminal-input'>");
-        return;
-    }
-
-    function printToTerminal(text, isCommand = false) {
-        const newLine = document.createElement("div");
-        newLine.style.marginBottom = "10px";
-        newLine.style.whiteSpace = "pre-wrap";
-        newLine.innerText = isCommand ? "> " + text : text;
-        
-        outputDiv.appendChild(newLine);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-    }
-
-    inputField.addEventListener("keydown", async (event) => {
-        if (event.key === "Enter") {
-            const rawInput = inputField.value.trim();
-            if (!rawInput) return;
-
-            printToTerminal(rawInput, true);
-            inputField.value = "";
-            
-            const parts = rawInput.split(" ");
-            const command = parts[0].toLowerCase();
-            const payloadText = parts.slice(1).join(" ");
-
-            const validCommands = ["/job_lead", "/grant_lead", "swarm", "apex", "evolve"];
-
-            if (validCommands.includes(command)) {
-                printToTerminal("Uplinking to Master Bridge... [Awaiting Phase Lock]");
-                inputField.disabled = true;
-                
-                const result = await routeToMasterBridge(command, payloadText || "Execute standard protocol.");
-                
-                printToTerminal(result);
-                inputField.disabled = false;
-                inputField.focus();
-            } else {
-                printToTerminal(`Unrecognized command. Valid protocols: /job_lead, /grant_lead, swarm, apex, evolve`);
+            if (response.status === 401) {
+                throw new Error("401 Unauthorized - Check MESH_AUTH_TOKEN");
+            } else if (response.status === 422) {
+                throw new Error("422 Unprocessable Entity - Invalid JSON Schema");
+            } else if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
             }
+
+            const data = await response.json();
+            
+            // Print success response
+            const responseLine = document.createElement("div");
+            responseLine.style.color = "#00ff00"; // Hacker green
+            responseLine.textContent = data.response;
+            terminalOutput.appendChild(responseLine);
+
+        } catch (error) {
+            // Print error
+            const errLine = document.createElement("div");
+            errLine.style.color = "red";
+            errLine.textContent = `[ERROR] ${error.message}`;
+            terminalOutput.appendChild(errLine);
         }
-    });
-    
-    printToTerminal("U4U Terminal Initialized. Enter a protocol to begin (e.g., /job_lead Hello).");
+
+        // Auto-scroll to the bottom of the terminal
+        if (terminalOutput.scrollHeight) {
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+    }
 });
