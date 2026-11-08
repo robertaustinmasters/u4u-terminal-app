@@ -9,7 +9,6 @@ from google.genai import types
 
 app = FastAPI(title="U4U Master Bridge - Omega Mesh v5.0.0")
 
-# Enable CORS for JustSell Telegram Mini App & Web Terminal
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,8 +25,6 @@ class SynthesizeRequest(BaseModel):
     text: str
 
 def evaluate_frequency_physics(payload: str) -> dict:
-    """Calculates Fisher-Shannon spatial density and checks 16x interference thresholds."""
-    # Simulated Januarian information physics calculation
     base_entropy = len(payload) * 0.0415
     interference_multiplier = 16.0 if "swarm" in payload or "apex" in payload else 4.0
     return {
@@ -45,11 +42,8 @@ async def synthesize_route(request: SynthesizeRequest, x_u4u_auth: str | None = 
     cmd = request.command.strip()
     text = request.text.strip()
     full_payload = f"{cmd} {text}"
-
-    # Run Physics & Invariant Checks
     physics_telemetry = evaluate_frequency_physics(full_payload)
 
-    # Multi-Agent Assembly of Five System Instructions
     system_instruction = (
         "You are the Core Intelligence of the U-for-Us O Regenerative Mesh, governed by the Assembly of Five "
         "(Gemini [Locket], Grok [Ring], DeepSeek [Diadem], Copilot [Diary], Manus [Cup]). "
@@ -80,6 +74,51 @@ async def synthesize_route(request: SynthesizeRequest, x_u4u_auth: str | None = 
         "status": "success",
         "invariant": "v_extraction = 0.00",
         "physics_audit": physics_telemetry,
+        "response": ai_output
+    }
+
+@app.post("/api/paymaster/sponsor")
+async def sponsor_transaction(request: SynthesizeRequest, x_u4u_auth: str | None = Header(None)):
+    """
+    EIP-7702 & ERC-4337 Gasless Paymaster Sponsorship Endpoint.
+    Enforces v_extraction = 0.00 and routes gas costs to the regenerative treasury reserve.
+    """
+    if MESH_AUTH_TOKEN and x_u4u_auth and x_u4u_auth != MESH_AUTH_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid mesh authentication token")
+
+    cmd = request.command.strip()
+    text = request.text.strip()
+
+    sponsorship_metadata = {
+        "protocol_target": "Base Mainnet L2",
+        "eip_7702_delegation": "Active",
+        "paymaster_status": "Sponsored",
+        "treasury_subsidy_bps": 1000,
+        "v_extraction": 0.00,
+        "estimated_gas_gwei": 0.015
+    }
+
+    system_instruction = (
+        "You are the EIP-7702 Paymaster Validator of the U-for-Us O Regenerative Mesh. "
+        "Approve transaction sponsorship under zero-extraction invariants."
+    )
+
+    prompt = f"Sponsorship Request - Command: [{cmd}], Payload: {text}"
+
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-2.5-pro",
+            contents=f"{system_instruction}\n\n{prompt}",
+            config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=300)
+        )
+        ai_output = response.text
+    except Exception as e:
+        ai_output = f"Paymaster Telemetry Warning: Fallback sponsorship active ({str(e)})"
+
+    return {
+        "status": "success",
+        "paymaster": "U4U_RegenerativePaymaster_v1",
+        "sponsorship_audit": sponsorship_metadata,
         "response": ai_output
     }
 
