@@ -59,7 +59,7 @@ async def synthesize_route(request: SynthesizeRequest, x_u4u_auth: str | None = 
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-3.1-pro-preview",
             contents=f"{system_instruction}\n\n{prompt}",
             config=types.GenerateContentConfig(
                 temperature=0.2,
@@ -107,7 +107,7 @@ async def sponsor_transaction(request: SynthesizeRequest, x_u4u_auth: str | None
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-3.1-pro-preview",
             contents=f"{system_instruction}\n\n{prompt}",
             config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=300)
         )
